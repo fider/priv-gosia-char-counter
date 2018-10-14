@@ -8,7 +8,7 @@ const os = require("os");
 const log = console.log.bind(console);
 
 // If true then all line-breaks will not be counted!! (less chars)
-let preserveLineBreaks = false;
+let preserveLineBreaks = true;
 
 
 // ===================== APPLICATION ===========================
@@ -28,8 +28,8 @@ async function main() {
 
     for(let file of filePaths) {
         let text = await getTextFromFile(file);
-
-        text = normalizeText(text);
+		
+        text = normalizeText(text);		
 
         fileName = file.split(path.sep).pop();
         log(`${fileName}:`);
@@ -82,10 +82,12 @@ async function getTextFromFile(filePath) {
 
 
 function normalizeText(text) {
-    // do nothing (for now)
+    
+	// Remove page numbers taken from notes
+	text = text.replace(/(\r\n|\n)\d{1,4}(\r\n|\n)/g, "");
 
     // Double spaces and double new lines
-    // text = text.replace(/(\r\n\r\n|\n\n|  )/g, "");
+    text = text.replace(/(\r\n\r\n|\n\n|  )/g, "");
 
     // New lines
     if (preserveLineBreaks) {
