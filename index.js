@@ -2,6 +2,8 @@ const textract = require("textract");
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
+const XlsxPopulate = require("xlsx-populate");
+const { inspect } = require("util");
 
 
 
@@ -26,16 +28,42 @@ async function main() {
         return;
     }
 
+    let dataRows = [];
+
     for(let file of filePaths) {
         let text = await getTextFromFile(file);
-		
-        text = normalizeText(text);		
+
+        text = normalizeText(text);
 
         fileName = file.split(path.sep).pop();
+
+        const charCount = text.length;
+
+        dataRows.push([fileName, charCount]);
+
         log(`${fileName}:`);
-        log(`  ${text.length}  znaków`);
+        log(`  ${charCount}  znaków`);
         log(``);
     }
+
+    // Load a new blank workbook
+    let workbook = await XlsxPopulate.fromBlankAsync();
+
+    let data = [
+        ["Plik", "Ilość znaków"],
+        ...dataRows,
+        ["", ""],
+        ["RAZEM:"]
+    ];
+
+    const cell = workbook.sheet(0).cell("A1");
+    cell.value(data);
+
+    workbook.sheet(0).cell(`B${dataRows.length + 3}`).formula(`=SUM(B2:B${dataRows.length + 1})`);
+
+    await workbook.toFileAsync("./Raport.xlsx");
+
+    log(`OK`);
 }
 
 
@@ -82,7 +110,7 @@ async function getTextFromFile(filePath) {
 
 
 function normalizeText(text) {
-    
+
 	// Remove page numbers taken from notes
 	text = text.replace(/(\r\n|\n)\d{1,4}(\r\n|\n)/g, "");
 
