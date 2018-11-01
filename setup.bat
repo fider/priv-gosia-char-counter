@@ -5,7 +5,7 @@
 
 
 @echo @echo off> aktualizacja.bat
-@echo cd %cd%>> aktualizacja.bat
+@echo cd /D %cd%>> aktualizacja.bat
 @echo git pull>> aktualizacja.bat
 @echo pause>> aktualizacja.bat
 
